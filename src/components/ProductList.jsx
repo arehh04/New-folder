@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useProducts } from '../hooks/useProducts';
+import { useProducts, useDebounce } from '../hooks';
 import ProductCard from './ProductCard';
 import CardSkeleton from './CardSkeleton';
 import FuzzySearchBar from './FuzzySearchBar';
@@ -20,6 +20,9 @@ export default function ProductList({ _onOpenCreateModal }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   
+  // Debounce search query by 300ms to eliminate continuous re-renders and re-filtering during typing
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  
   // Feature 5: Multi-Facet Filters
   const [maxPrice, setMaxPrice] = useState(500);
   const [minRating, setMinRating] = useState(0);
@@ -33,17 +36,19 @@ export default function ProductList({ _onOpenCreateModal }) {
     return ['All', ...unique];
   }, [products]);
 
-  // Filter and sort products across all facets
+  // Filter and sort products across all facets using debounced search
   const filteredProducts = useMemo(() => {
     if (!products) return [];
+
+    const query = debouncedSearchQuery.trim().toLowerCase();
 
     return products
       .filter(product => {
         const matchesCategory = selectedCategory === 'All' || product.category?.toLowerCase() === selectedCategory.toLowerCase();
-        const matchesSearch = searchQuery.trim() === '' || 
-          product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (product.brand && product.brand.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesSearch = query === '' || 
+          product.title?.toLowerCase().includes(query) ||
+          product.description?.toLowerCase().includes(query) ||
+          (product.brand && product.brand.toLowerCase().includes(query));
         
         const matchesPrice = Number(product.price) <= maxPrice;
         const matchesRating = Number(product.rating || 0) >= minRating;
@@ -57,7 +62,7 @@ export default function ProductList({ _onOpenCreateModal }) {
         if (sortBy === 'rating-desc') return b.rating - a.rating;
         return 0; // 'featured' or default
       });
-  }, [products, selectedCategory, searchQuery, sortBy, maxPrice, minRating, inStockOnly]);
+  }, [products, selectedCategory, debouncedSearchQuery, sortBy, maxPrice, minRating, inStockOnly]);
 
   const hasActiveFacets = selectedCategory !== 'All' || searchQuery !== '' || sortBy !== 'featured' || maxPrice < 500 || minRating > 0 || inStockOnly;
 
