@@ -70,9 +70,8 @@ export const authBusiness = {
   /**
    * Log out patron and clear storage
    */
-  logoutPatron: (): void => {
-    localStorage.removeItem('id10t_auth_token');
-    localStorage.removeItem('id10t_auth_user');
+  logoutPatron: async (): Promise<void> => {
+    await authService.logout();
   }
 };
 

@@ -1,5 +1,6 @@
 import axiosInstance from '../api/axiosInstance';
 import { UserDTO } from '../types';
+import { APP_CONFIG } from '../config/constants';
 
 export interface LoginCredentials {
   username: string;
@@ -28,33 +29,60 @@ export interface RegisterUserData {
  */
 export const authService = {
   /**
-   * Authenticate a user with credentials
+   * Authenticate a user with credentials and store JWT token
    */
   login: async (credentials: LoginCredentials): Promise<AuthLoginResponse> => {
     const res = await axiosInstance.post<AuthLoginResponse>('/auth/login', {
       ...credentials,
       expiresInMins: credentials.expiresInMins || 60
     });
-    return res.data;
+    const data = res.data;
+    const token = data.accessToken || data.token;
+    if (token) {
+      localStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN, token);
+      localStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER, JSON.stringify(data));
+    }
+    return data;
   },
 
   /**
-   * Register a new user
+   * Register a new patron into the vault
    */
-  register: async (userData: RegisterUserData): Promise<UserDTO> => {
-    const res = await axiosInstance.post<UserDTO>('/users/add', userData);
-    return res.data;
+  register: async (userData: RegisterUserData): Promise<AuthLoginResponse> => {
+    const res = await axiosInstance.post<AuthLoginResponse>('/auth/register', userData);
+    const data = res.data;
+    const token = data.accessToken || data.token;
+    if (token) {
+      localStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN, token);
+      localStorage.setItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER, JSON.stringify(data));
+    }
+    return data;
   },
 
   /**
    * Fetch current authenticated user profile using token
    */
   getCurrentUser: async (token?: string): Promise<UserDTO> => {
-    const config = token 
-      ? { headers: { Authorization: `Bearer ${token}` } } 
+    const activeToken = token || localStorage.getItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    const config = activeToken 
+      ? { headers: { Authorization: `Bearer ${activeToken}` } } 
       : undefined;
     const res = await axiosInstance.get<UserDTO>('/auth/me', config);
     return res.data;
+  },
+
+  /**
+   * Terminate active session and clear token storage
+   */
+  logout: async (): Promise<void> => {
+    try {
+      await axiosInstance.post('/auth/logout');
+    } catch (err) {
+      console.warn("Backend logout notification failed (clearing local state anyway):", err);
+    } finally {
+      localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.AUTH_USER);
+    }
   }
 };
 

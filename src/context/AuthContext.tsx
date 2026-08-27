@@ -14,7 +14,7 @@ export interface AuthContextType {
   closeAuthModal: () => void;
   login: (credentials: LoginCredentials) => Promise<UIUserProfile | null>;
   register: (userData: RegisterUserData) => Promise<UIUserProfile | null>;
-  logout: () => void;
+  logout: () => Promise<void> | void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -66,8 +66,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     }
   }, []);
 
-  const logout = useCallback((): void => {
-    authBusiness.logoutPatron();
+  const logout = useCallback(async (): Promise<void> => {
+    await authBusiness.logoutPatron();
     setCurrentUser(null);
   }, []);
 
