@@ -1,19 +1,29 @@
 import { useState, useEffect } from 'react';
 import { productBusiness } from '../business/productBusiness';
+import { UIProduct } from '../types';
+
+export interface UseProductResult {
+  product: UIProduct | null;
+  loading: boolean;
+  error: string | null;
+}
 
 /**
  * Custom hook to manage fetching and formatting a single product
- * @param {string|number} id - Product ID to fetch
- * @returns {Object} { product, loading, error }
  */
-export function useProduct(id) {
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export function useProduct(id?: string | number): UseProductResult {
+  const [product, setProduct] = useState<UIProduct | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
     
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
     if (id === 'error') {
       throw new Error('This is a simulated render error for testing the Error Boundary.');
     }
@@ -26,7 +36,7 @@ export function useProduct(id) {
           setLoading(false);
         }
       })
-      .catch(err => {
+      .catch((err: any) => {
         if (isMounted) {
           setError(err.message);
           setLoading(false);
@@ -40,3 +50,5 @@ export function useProduct(id) {
 
   return { product, loading, error };
 }
+
+export default useProduct;
