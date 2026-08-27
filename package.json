@@ -1,0 +1,45 @@
+{
+  "name": "id10t-maison-de-luxe",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Haute E-Commerce Sanctuary - Full-Stack Luxury Platform",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "server": "node server/index.js",
+    "dev:all": "concurrently \"npm run server\" \"npm run dev\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:api": "node scripts/test-full-suite.mjs",
+    "test:injection": "node scripts/injection-audit.mjs",
+    "test:redteam": "node scripts/redteam-audit.mjs",
+    "test:blueteam": "node scripts/blueteam-verify.mjs",
+    "test:analytics": "node scripts/analytics-fuzzy-test.mjs",
+    "lint": "oxlint"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "axios": "^1.19.0",
+    "bcryptjs": "^3.0.3",
+    "concurrently": "^10.0.5",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "ioredis": "^6.0.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.9.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.1.0",
+    "autoprefixer": "^10.5.4",
+    "oxlint": "^1.79.0",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.2.2"
+  }
+}

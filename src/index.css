@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cinzel", "Playfair Display", "Georgia", serif;
+  --font-sans: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-royalty-wine: #6B1D2F;
+  --color-royalty-wine-hover: #521523;
+  --color-royalty-wine-light: #FBF2F4;
+  
+  --color-royalty-purple: #2A173B;
+  --color-royalty-purple-dark: #1A0D26;
+  --color-royalty-purple-light: #F5EFF9;
+  
+  --color-royalty-yellow: #D4AF37;
+  --color-royalty-yellow-light: #FBF6E2;
+  --color-royalty-yellow-dark: #B88E10;
+  
+  --color-royalty-nude: #FAF7F2;
+  --color-royalty-nude-dark: #EAE2D8;
+  --color-royalty-nude-card: #FFFFFF;
+
+  /* Aliases for backwards compatibility */
+  --color-royalty-red: #6B1D2F;
+}
+
+@layer base {
+  body {
+    background-color: #FAF7F2;
+    color: #1F1A24;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Custom Luxury Glass & Glow utilities */
+.luxury-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.luxury-dark-glass {
+  background: rgba(26, 13, 38, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.gold-shimmer {
+  background: linear-gradient(135deg, #D4AF37 0%, #F5E6BE 50%, #D4AF37 100%);
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #ECC860 0%, #D4AF37 50%, #AA820A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
