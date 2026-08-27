@@ -1,16 +1,29 @@
 import { useState, useEffect, useCallback } from 'react';
 import { productBusiness } from '../business/productBusiness';
+import { UIProduct } from '../types';
+
+export interface UseProductsResult {
+  products: UIProduct[];
+  loading: boolean;
+  loadingMore: boolean;
+  error: string | null;
+  total: number;
+  hasMore: boolean;
+  loadMoreProducts: () => Promise<void>;
+  refreshProducts: () => Promise<void>;
+  addProductLocally: (newProduct: UIProduct) => void;
+}
 
 /**
- * Custom hook to manage fetching, filtering, and paginating products
+ * Custom TypeScript hook to manage fetching, filtering, and paginating products
  */
-export function useProducts(initialLimit = 8) {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState(null);
-  const [total, setTotal] = useState(0);
-  const [skip, setSkip] = useState(0);
+export function useProducts(initialLimit: number = 12): UseProductsResult {
+  const [products, setProducts] = useState<UIProduct[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState<number>(0);
+  const [skip, setSkip] = useState<number>(0);
 
   const fetchInitialProducts = useCallback(async () => {
     setLoading(true);
@@ -23,7 +36,7 @@ export function useProducts(initialLimit = 8) {
       setProducts(data.products || []);
       setTotal(data.total || 0);
       setSkip(data.products?.length || 0);
-    } catch (err) {
+    } catch (err: any) {
       console.error("useProducts hook error:", err);
       setError(err.message || 'Failed to fetch sovereign products');
     } finally {
@@ -56,7 +69,7 @@ export function useProducts(initialLimit = 8) {
     }
   }, [loadingMore, products.length, total, initialLimit, skip]);
 
-  const addProductLocally = useCallback((newProduct) => {
+  const addProductLocally = useCallback((newProduct: UIProduct) => {
     setProducts(prev => [newProduct, ...prev]);
     setTotal(prev => prev + 1);
   }, []);
@@ -73,3 +86,5 @@ export function useProducts(initialLimit = 8) {
     addProductLocally
   };
 }
+
+export default useProducts;

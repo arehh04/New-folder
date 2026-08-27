@@ -1,4 +1,34 @@
 import axiosInstance from '../api/axiosInstance';
+import { SalesVelocityMetrics, OrderDTO } from '../types';
+
+export interface AdminMetricsResponse {
+  metrics: {
+    totalRevenue: number;
+    totalOrders: number;
+    avgOrderValue: number;
+    totalArtifacts: number;
+    totalItemsSold: number;
+    categoryCounts: Record<string, number>;
+  };
+  recentOrders: OrderDTO[];
+}
+
+export interface InventoryAlertItem {
+  id: number;
+  title: string;
+  stock: number;
+  price: number;
+  category: string;
+}
+
+export interface InventoryAlertsResponse {
+  alerts: InventoryAlertItem[];
+}
+
+export interface UpdateOrderStatusPayload {
+  status: string;
+  estimatedDelivery?: string;
+}
 
 /**
  * Admin Service Layer (Encapsulated Promise API for Store Custodians)
@@ -6,35 +36,32 @@ import axiosInstance from '../api/axiosInstance';
 export const adminService = {
   /**
    * Fetch executive metrics & KPI summaries
-   * @returns {Promise<Object>} Metrics & recent orders
    */
-  getMetrics: async () => {
-    const res = await axiosInstance.get('/admin/metrics');
+  getMetrics: async (): Promise<AdminMetricsResponse> => {
+    const res = await axiosInstance.get<AdminMetricsResponse>('/admin/metrics');
     return res.data;
   },
 
   /**
    * Fetch low stock & depleted inventory alerts
-   * @returns {Promise<Object>} Inventory alerts
    */
-  getInventoryAlerts: async () => {
-    const res = await axiosInstance.get('/admin/inventory-alerts');
+  getInventoryAlerts: async (): Promise<InventoryAlertsResponse> => {
+    const res = await axiosInstance.get<InventoryAlertsResponse>('/admin/inventory-alerts');
     return res.data;
   },
 
   /**
    * Fetch executive sales velocity & category distribution
-   * @returns {Promise<Object>} Sales velocity data
    */
-  getSalesVelocity: async () => {
-    const res = await axiosInstance.get('/admin/analytics/sales-velocity');
+  getSalesVelocity: async (): Promise<SalesVelocityMetrics> => {
+    const res = await axiosInstance.get<SalesVelocityMetrics>('/admin/analytics/sales-velocity');
     return res.data;
   },
 
   /**
    * Download Orders CSV report file
    */
-  downloadOrdersCSV: async () => {
+  downloadOrdersCSV: async (): Promise<void> => {
     const res = await axiosInstance.get('/admin/export/orders-csv', {
       responseType: 'blob'
     });
@@ -51,7 +78,7 @@ export const adminService = {
   /**
    * Download Inventory Valuation CSV report file
    */
-  downloadInventoryCSV: async () => {
+  downloadInventoryCSV: async (): Promise<void> => {
     const res = await axiosInstance.get('/admin/export/inventory-csv', {
       responseType: 'blob'
     });
@@ -67,12 +94,11 @@ export const adminService = {
 
   /**
    * Update fulfillment status of an order
-   * @param {string} orderId 
-   * @param {Object} statusData - { status, estimatedDelivery }
-   * @returns {Promise<Object>} Updated order record
    */
-  updateOrderStatus: async (orderId, statusData) => {
-    const res = await axiosInstance.patch(`/admin/orders/${orderId}/status`, statusData);
+  updateOrderStatus: async (orderId: string, payload: UpdateOrderStatusPayload): Promise<OrderDTO> => {
+    const res = await axiosInstance.patch<OrderDTO>(`/admin/orders/${orderId}/status`, payload);
     return res.data;
   }
 };
+
+export default adminService;
