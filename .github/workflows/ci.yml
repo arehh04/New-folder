@@ -1,0 +1,55 @@
+name: Sovereign CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify:
+    name: 🛡️ Strict Quality & Security Verification
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🔍 TypeScript Strict Typecheck
+        run: npm run typecheck
+
+      - name: ⚡ Vite Production Build
+        run: npm run build
+
+      - name: 🚀 Start Backend API for Automated Audits
+        run: |
+          node server/index.js &
+          sleep 3
+
+      - name: 🧪 Run Core API & RBAC Test Suite
+        run: npm run test:api
+
+      - name: 📊 Run Fuzzy Search & Sales Velocity Suite
+        run: npm run test:analytics
+
+      - name: 💉 Run SQL & NoSQL Injection Penetration Suite
+        run: npm run test:injection
+
+      - name: 🔴 Run Red Team Adversarial Security Audit
+        run: npm run test:redteam
+
+      - name: 🔵 Run Blue Team Defensive Operations Audit
+        run: npm run test:blueteam
