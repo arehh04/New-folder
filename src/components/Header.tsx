@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import { useState, FC } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 
-export default function Header() {
+export const Header: FC = () => {
   const { getCartCount, getCartSubtotal, toggleCart } = useCart();
   const { currentUser, isAuthenticated, openLoginModal, logout } = useAuth();
   const { getWishlistCount } = useWishlist();
   
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState<boolean>(false);
 
   const cartCount = getCartCount();
   const wishlistCount = getWishlistCount();
@@ -59,52 +59,73 @@ export default function Header() {
               className="relative flex items-center gap-1.5 text-royalty-nude/90 hover:text-royalty-yellow font-semibold text-xs uppercase tracking-wider py-2 px-3 rounded-full hover:bg-white/10 transition-colors"
               title="Sovereign Wishlist"
             >
-              <span className="text-base">💖</span>
+              <span>💖</span>
               <span className="hidden sm:inline">Wishlist</span>
               {wishlistCount > 0 && (
-                <span className="bg-royalty-wine text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="bg-royalty-wine text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center border border-royalty-yellow/50">
                   {wishlistCount}
                 </span>
               )}
             </Link>
 
-            {/* Sovereign Identity (Auth) */}
-            {isAuthenticated ? (
+            {/* Orders Link */}
+            <Link
+              to="/orders"
+              className="text-royalty-nude/90 hover:text-royalty-yellow font-semibold text-xs uppercase tracking-wider py-2 px-3 rounded-full hover:bg-white/10 transition-colors hidden sm:flex items-center gap-1.5"
+              title="Sovereign Ledger & Orders"
+            >
+              <span>📜</span>
+              <span>Ledger</span>
+            </Link>
+
+            {/* Auth / Profile Button */}
+            {isAuthenticated && currentUser ? (
               <div className="relative">
                 <button
-                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-royalty-yellow/40 px-3 py-1.5 rounded-full transition-all cursor-pointer"
+                  type="button"
+                  onClick={() => setIsProfileMenuOpen(prev => !prev)}
+                  className="flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-royalty-yellow/40 hover:border-royalty-yellow text-royalty-yellow text-xs font-bold py-1.5 px-3 rounded-full transition-all cursor-pointer shadow-xs"
                 >
                   <img 
-                    src={currentUser.avatarUrl || currentUser.image} 
-                    alt={currentUser.username} 
-                    className="w-6 h-6 rounded-full object-cover border border-royalty-yellow"
+                    src={currentUser.avatarUrl || currentUser.avatar} 
+                    alt={currentUser.fullName}
+                    className="w-5 h-5 rounded-full object-cover border border-royalty-yellow/50" 
                   />
-                  <span className="text-xs font-bold text-royalty-yellow hidden sm:inline">
-                    {currentUser.firstName || currentUser.username}
+                  <span className="max-w-[100px] truncate hidden sm:inline">
+                    {currentUser.fullName}
                   </span>
-                  <span className="text-[10px] text-royalty-nude/70">▼</span>
+                  <span className="text-[10px]">▼</span>
                 </button>
 
-                {/* Profile Dropdown Menu */}
+                {/* Dropdown Menu */}
                 {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-2xl border border-royalty-nude-dark py-2 text-slate-800 animate-in fade-in zoom-in-95 duration-150 z-50">
-                    <div className="px-4 py-2.5 border-b border-royalty-nude">
-                      <p className="font-extrabold text-sm text-royalty-purple truncate">
-                        {currentUser.fullName || currentUser.username}
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-royalty-nude-dark py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-4 py-3 border-b border-royalty-nude">
+                      <p className="text-xs font-bold text-royalty-purple truncate">
+                        {currentUser.fullName}
                       </p>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-royalty-wine">
-                        {currentUser.role === 'admin' ? '⚜️ Sovereign Custodian (Admin)' : '👑 Sovereign Patron'}
+                      <p className="text-[11px] text-slate-400 truncate">
+                        {currentUser.email}
                       </p>
+                      <span className="inline-block mt-1 px-2 py-0.5 bg-royalty-yellow-light text-royalty-purple text-[10px] font-extrabold uppercase tracking-wider rounded-md">
+                        {currentUser.displayRole || currentUser.role}
+                      </span>
                     </div>
 
-                    {/* Order Ledger Link */}
                     <Link
                       to="/orders"
                       onClick={() => setIsProfileMenuOpen(false)}
-                      className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-royalty-nude hover:text-royalty-purple transition-colors flex items-center gap-2.5"
+                      className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-royalty-nude transition-colors flex items-center gap-2.5"
                     >
-                      <span>📜</span> Order Archives & Tracking
+                      <span>📜</span> Order History & Ledger
+                    </Link>
+
+                    <Link
+                      to="/wishlist"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                      className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-royalty-nude transition-colors flex items-center gap-2.5"
+                    >
+                      <span>💖</span> Sovereign Wishlist
                     </Link>
 
                     {/* Admin Dashboard Link (Conditional) */}
@@ -121,6 +142,7 @@ export default function Header() {
                     <div className="border-t border-royalty-nude my-1"></div>
 
                     <button
+                      type="button"
                       onClick={() => {
                         logout();
                         setIsProfileMenuOpen(false);
@@ -134,6 +156,7 @@ export default function Header() {
               </div>
             ) : (
               <button
+                type="button"
                 onClick={openLoginModal}
                 className="flex items-center gap-1.5 bg-white/10 hover:bg-white/15 border border-royalty-yellow/40 hover:border-royalty-yellow text-royalty-yellow text-xs font-bold uppercase tracking-wider py-2 px-3.5 sm:px-4 rounded-full transition-all cursor-pointer shadow-xs"
               >
@@ -144,6 +167,7 @@ export default function Header() {
 
             {/* Cart Trigger */}
             <button
+              type="button"
               onClick={toggleCart}
               className="flex items-center gap-2 sm:gap-3 bg-white/10 hover:bg-white/15 border border-royalty-yellow/40 hover:border-royalty-yellow px-3 sm:px-4 py-2 rounded-full transition-all duration-300 cursor-pointer shadow-sm group"
               aria-label="Open cart drawer"
@@ -165,4 +189,6 @@ export default function Header() {
       </header>
     </>
   );
-}
+};
+
+export default Header;

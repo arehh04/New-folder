@@ -1,7 +1,9 @@
+import { FC } from 'react';
 import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { formatCurrency } from '../utils/formatters';
 
-export default function CartDrawer() {
+export const CartDrawer: FC = () => {
   const { 
     cartItems, 
     isCartOpen, 
@@ -21,7 +23,7 @@ export default function CartDrawer() {
 
   if (!isCartOpen) return null;
 
-  const handleProceedToCheckout = () => {
+  const handleProceedToCheckout = (): void => {
     closeCart();
     navigate('/checkout');
   };
@@ -52,6 +54,7 @@ export default function CartDrawer() {
               </div>
             </div>
             <button 
+              type="button"
               onClick={closeCart}
               className="text-royalty-nude/80 hover:text-white text-2xl font-light w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer"
               aria-label="Close cart"
@@ -90,6 +93,7 @@ export default function CartDrawer() {
                   Acquire sovereign artifacts and premium essentials from our curated collection.
                 </p>
                 <button
+                  type="button"
                   onClick={closeCart}
                   className="bg-royalty-wine hover:bg-royalty-wine-hover text-white font-bold py-3 px-8 rounded-full text-xs uppercase tracking-widest transition-all shadow-md hover:shadow-lg cursor-pointer"
                 >
@@ -118,6 +122,7 @@ export default function CartDrawer() {
                           {item.displayName || item.title}
                         </Link>
                         <button
+                          type="button"
                           onClick={() => removeFromCart(item.id)}
                           className="text-slate-400 hover:text-red-500 text-sm p-1 transition-colors cursor-pointer"
                           title="Remove item"
@@ -134,6 +139,7 @@ export default function CartDrawer() {
                       {/* Quantity selector */}
                       <div className="flex items-center border border-royalty-nude-dark bg-white rounded-lg overflow-hidden shadow-xs">
                         <button
+                          type="button"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           className="w-7 h-7 flex items-center justify-center text-slate-600 hover:bg-royalty-nude text-xs font-bold transition-colors cursor-pointer"
                         >
@@ -143,6 +149,7 @@ export default function CartDrawer() {
                           {item.quantity}
                         </span>
                         <button
+                          type="button"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           className="w-7 h-7 flex items-center justify-center text-slate-600 hover:bg-royalty-nude text-xs font-bold transition-colors cursor-pointer"
                         >
@@ -151,7 +158,7 @@ export default function CartDrawer() {
                       </div>
 
                       <span className="font-extrabold text-sm text-royalty-wine">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        {formatCurrency(Number(item.price) * Number(item.quantity))}
                       </span>
                     </div>
                   </div>
@@ -177,13 +184,14 @@ export default function CartDrawer() {
                 <div className="pt-2 border-t border-royalty-nude-dark flex justify-between text-base font-extrabold text-royalty-purple">
                   <span>Estimated Total</span>
                   <span className="text-xl text-royalty-wine">
-                    ${(subtotal.raw + (amountToFreeShipping === 0 ? 0 : 12)).toFixed(2)}
+                    {formatCurrency(subtotal.raw + (amountToFreeShipping === 0 ? 0 : 12))}
                   </span>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <button
+                  type="button"
                   onClick={handleProceedToCheckout}
                   className="w-full bg-gradient-to-r from-royalty-wine to-royalty-purple hover:brightness-110 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 uppercase tracking-widest text-xs flex items-center justify-center gap-2 border border-royalty-yellow/40 cursor-pointer"
                 >
@@ -191,6 +199,7 @@ export default function CartDrawer() {
                 </button>
                 <div className="flex justify-between items-center px-1">
                   <button
+                    type="button"
                     onClick={clearCart}
                     className="text-xs text-slate-400 hover:text-red-500 transition-colors underline cursor-pointer"
                   >
@@ -208,4 +217,6 @@ export default function CartDrawer() {
       </div>
     </div>
   );
-}
+};
+
+export default CartDrawer;

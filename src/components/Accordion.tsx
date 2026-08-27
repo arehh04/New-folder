@@ -1,17 +1,24 @@
-import { useState } from 'react';
+import { useState, ReactNode, FC } from 'react';
+
+export interface AccordionProps {
+  title: string;
+  defaultOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
+  children: ReactNode;
+}
 
 /**
  * Royal Accordion / Collapsible Panel
- * @param {Object} props
- * @param {string} props.title - Accordion header label
- * @param {boolean} [props.defaultOpen=false] - Initial expanded state
- * @param {Function} [props.onToggle] - Callback on state change
- * @param {React.ReactNode} props.children - Accordion body content
  */
-export default function Accordion({ title, defaultOpen = false, onToggle, children }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+export const Accordion: FC<AccordionProps> = ({ 
+  title, 
+  defaultOpen = false, 
+  onToggle, 
+  children 
+}) => {
+  const [isOpen, setIsOpen] = useState<boolean>(defaultOpen);
 
-  const handleToggle = () => {
+  const handleToggle = (): void => {
     const newState = !isOpen;
     setIsOpen(newState);
     if (onToggle) onToggle(newState);
@@ -40,4 +47,6 @@ export default function Accordion({ title, defaultOpen = false, onToggle, childr
       )}
     </div>
   );
-}
+};
+
+export default Accordion;

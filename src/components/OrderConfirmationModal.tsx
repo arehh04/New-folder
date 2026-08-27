@@ -1,11 +1,18 @@
+import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { OrderModel } from '../types';
 
-export default function OrderConfirmationModal({ order, onClose }) {
+export interface OrderConfirmationModalProps {
+  order: (OrderModel & { estimatedDelivery?: string }) | null;
+  onClose?: () => void;
+}
+
+export const OrderConfirmationModal: FC<OrderConfirmationModalProps> = ({ order, onClose }) => {
   const navigate = useNavigate();
 
   if (!order) return null;
 
-  const handleReturnHome = () => {
+  const handleReturnHome = (): void => {
     if (onClose) onClose();
     navigate('/');
   };
@@ -51,53 +58,55 @@ export default function OrderConfirmationModal({ order, onClose }) {
                   Estimated Dispatch
                 </span>
                 <span className="text-xs font-bold text-emerald-700">
-                  {order.estimatedDelivery}
+                  {order.estimatedDelivery || '2–3 Business Days'}
                 </span>
               </div>
             </div>
 
             {/* Summary Items */}
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
-                Acquired Artifacts ({order.items?.length})
-              </h4>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-3">
+                Acquired Artifacts ({order.items.length})
+              </span>
               <div className="max-h-40 overflow-y-auto space-y-2 pr-1">
-                {order.items?.map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-xs py-2 border-b border-royalty-nude">
-                    <div className="flex items-center gap-3">
-                      <img 
-                        src={item.thumbnail} 
-                        alt={item.title} 
-                        className="w-8 h-8 rounded-lg object-contain bg-royalty-nude p-1 border border-royalty-nude-dark" 
-                      />
-                      <span className="font-bold text-royalty-purple line-clamp-1 max-w-[12rem]">
-                        {item.title} (x{item.quantity})
-                      </span>
-                    </div>
-                    <span className="font-bold text-slate-800">
-                      ${(item.price * item.quantity).toFixed(2)}
+                {order.items.map((item, idx) => (
+                  <div key={idx} className="flex justify-between items-center text-xs py-1.5 border-b border-royalty-nude last:border-0">
+                    <span className="font-semibold text-slate-700 truncate max-w-[240px]">
+                      {item.title} <span className="text-slate-400 font-normal">x{item.quantity}</span>
+                    </span>
+                    <span className="font-mono font-bold text-royalty-wine">
+                      ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Address & Payment Info */}
-            <div className="text-xs text-slate-600 bg-white border border-royalty-nude-dark p-4 rounded-2xl space-y-1">
-              <p><strong>Patron:</strong> {order.customer?.fullName} ({order.customer?.email})</p>
-              <p><strong>Destination:</strong> {order.shippingAddress?.street}, {order.shippingAddress?.city} {order.shippingAddress?.postalCode}</p>
-              <p><strong>Courier:</strong> {order.deliveryMethod}</p>
-              <div className="pt-2 mt-2 border-t border-royalty-nude flex justify-between font-extrabold text-sm text-royalty-purple">
-                <span>Grand Total Settled:</span>
-                <span className="text-royalty-wine">${order.total?.toFixed(2)}</span>
+            {/* Financial Ledger Summary */}
+            <div className="pt-4 border-t border-royalty-nude space-y-1.5 text-xs text-slate-600">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>{order.formattedSubtotal}</span>
+              </div>
+              {order.discount > 0 && (
+                <div className="flex justify-between text-emerald-700 font-bold">
+                  <span>Privilege Discount</span>
+                  <span>-{order.formattedDiscount}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-base font-black text-royalty-purple pt-2 border-t border-royalty-nude">
+                <span>Total Capital</span>
+                <span className="text-royalty-wine">{order.formattedTotal}</span>
               </div>
             </div>
 
+            {/* Actions */}
             <button
+              type="button"
               onClick={handleReturnHome}
-              className="w-full bg-gradient-to-r from-royalty-wine to-royalty-purple hover:brightness-110 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl uppercase tracking-widest text-xs border border-royalty-yellow/40 transition-all cursor-pointer"
+              className="w-full bg-gradient-to-r from-royalty-wine to-royalty-purple hover:brightness-110 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg transition-all uppercase tracking-widest text-xs cursor-pointer border border-royalty-yellow/40"
             >
-              👑 Return to Curations
+              ⚜️ Return to Sovereign Catalog
             </button>
 
           </div>
@@ -106,4 +115,6 @@ export default function OrderConfirmationModal({ order, onClose }) {
       </div>
     </div>
   );
-}
+};
+
+export default OrderConfirmationModal;

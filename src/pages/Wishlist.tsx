@@ -1,3 +1,4 @@
+import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
@@ -5,11 +6,11 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
 
-export default function Wishlist() {
+export const Wishlist: FC = () => {
   const { wishlistItems } = useWishlist();
   const { addToCart, showToast } = useCart();
 
-  const handleMoveAllToCart = () => {
+  const handleMoveAllToCart = (): void => {
     if (wishlistItems.length === 0) return;
     wishlistItems.forEach(item => {
       addToCart(item, 1, false);
@@ -39,6 +40,7 @@ export default function Wishlist() {
 
           {wishlistItems.length > 0 && (
             <button
+              type="button"
               onClick={handleMoveAllToCart}
               className="bg-gradient-to-r from-royalty-wine to-royalty-purple hover:brightness-110 text-white font-extrabold py-3 px-6 rounded-full shadow-md text-xs uppercase tracking-wider transition-all cursor-pointer border border-royalty-yellow/30"
             >
@@ -59,7 +61,7 @@ export default function Wishlist() {
               to="/"
               className="inline-block bg-royalty-wine hover:bg-royalty-wine-hover text-white font-bold py-3.5 px-8 rounded-full text-xs uppercase tracking-widest transition-all shadow-md"
             >
-              Explore Sovereign Collection
+              Discover Treasures
             </Link>
           </div>
         ) : (
@@ -75,4 +77,6 @@ export default function Wishlist() {
       <Footer />
     </div>
   );
-}
+};
+
+export default Wishlist;

@@ -1,33 +1,34 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, FC, FormEvent } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productBusiness } from '../business/productBusiness';
 import { useCart } from '../context/CartContext';
 import QuantitySelector from './QuantitySelector';
 import Accordion from './Accordion';
 import ProductReviews from './ProductReviews';
+import { UIProduct } from '../types';
 
-export default function ProductDetail() {
-  const { id } = useParams();
+export const ProductDetail: FC = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart, showToast } = useCart();
   
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState<UIProduct | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
 
   // Inventory Management State
-  const [editPrice, setEditPrice] = useState('');
-  const [editStock, setEditStock] = useState('');
-  const [isUpdatingInventory, setIsUpdatingInventory] = useState(false);
-  const [isDeletingArtifact, setIsDeletingArtifact] = useState(false);
-  const [inventoryMessage, setInventoryMessage] = useState(null);
+  const [editPrice, setEditPrice] = useState<string | number>('');
+  const [editStock, setEditStock] = useState<string | number>('');
+  const [isUpdatingInventory, setIsUpdatingInventory] = useState<boolean>(false);
+  const [isDeletingArtifact, setIsDeletingArtifact] = useState<boolean>(false);
+  const [inventoryMessage, setInventoryMessage] = useState<string | null>(null);
 
   /**
    * fetchProduct callback function to fetch and format product data
    */
-  const fetchProduct = useCallback(async (productId) => {
+  const fetchProduct = useCallback(async (productId?: string) => {
     if (!productId) return;
 
     if (productId === 'error') {
@@ -44,7 +45,7 @@ export default function ProductDetail() {
       if (data?.thumbnail) {
         setSelectedImage(data.thumbnail);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error in fetchProduct callback:", err);
       setError(err.message || 'Artifact not found in the Royal Vault');
     } finally {
@@ -52,9 +53,6 @@ export default function ProductDetail() {
     }
   }, []);
 
-  /**
-   * useEffect callback hook that executes fetchProduct when id changes
-   */
   useEffect(() => {
     fetchProduct(id);
   }, [id, fetchProduct]);
@@ -62,21 +60,22 @@ export default function ProductDetail() {
   /**
    * updateInventoryCallback: Promise API invocation to update product details
    */
-  const handleUpdateInventory = useCallback(async (e) => {
+  const handleUpdateInventory = useCallback(async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!id || !product) return;
+
     setIsUpdatingInventory(true);
     setInventoryMessage(null);
 
     try {
-      // Invoking the Promise API
       const updated = await productBusiness.updateProductInventory(id, {
         price: Number(editPrice),
         stock: Number(editStock)
       });
-      setProduct(prev => ({ ...prev, ...updated }));
+      setProduct(prev => (prev ? { ...prev, ...updated } : updated));
       setInventoryMessage('✨ Vault records successfully updated in royal archives!');
       showToast(`👑 Updated inventory for ${product.displayName}`);
-    } catch (err) {
+    } catch (err: any) {
       setInventoryMessage(`⚠️ Update failed: ${err.message}`);
     } finally {
       setIsUpdatingInventory(false);
@@ -87,25 +86,28 @@ export default function ProductDetail() {
    * deleteArtifactCallback: Promise API invocation to delete / retire a product
    */
   const handleDeleteArtifact = useCallback(async () => {
+    if (!id || !product) return;
+
     if (!window.confirm(`Are you certain you wish to retire "${product.displayName}" from the Royal Vault?`)) {
       return;
     }
 
     setIsDeletingArtifact(true);
     try {
-      // Invoking the Promise API
       await productBusiness.deleteProductFromVault(id);
       showToast(`🗑️ Retired ${product.displayName} from the Vault`);
       alert(`⚜️ Artifact #${id} has been permanently retired from the Royal Vault.`);
       navigate('/');
-    } catch (err) {
+    } catch (err: any) {
       alert(`⚠️ Deletion failed: ${err.message}`);
       setIsDeletingArtifact(false);
     }
   }, [id, product, navigate, showToast]);
 
-  const handleAddToCart = () => {
-    addToCart(product, quantity);
+  const handleAddToCart = (): void => {
+    if (product) {
+      addToCart(product, quantity);
+    }
   };
 
   if (loading) {
@@ -140,63 +142,62 @@ export default function ProductDetail() {
   const currentImage = selectedImage || product.thumbnail;
 
   return (
-    <div className="product-detail-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+    <div className="product-detail-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 animate-fadeIn">
       
       {/* Breadcrumb Navigation */}
-      <nav className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-8 uppercase tracking-widest">
-        <Link to="/" className="hover:text-royalty-wine transition-colors">Home</Link>
+      <nav className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-widest mb-10">
+        <Link to="/" className="hover:text-royalty-wine transition-colors">
+          Vault Catalog
+        </Link>
         <span>/</span>
-        <Link to="/" className="hover:text-royalty-wine transition-colors">{product.category}</Link>
+        <span className="text-slate-400">{product.category}</span>
         <span>/</span>
         <span className="text-royalty-purple font-bold truncate max-w-xs">{product.displayName}</span>
       </nav>
 
-      {/* Product Showcase Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 bg-white rounded-3xl p-6 sm:p-12 border border-royalty-nude-dark shadow-sm">
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
         
-        {/* Left Column: Image Gallery */}
-        <div className="flex flex-col gap-6">
+        {/* Left: Gallery Column */}
+        <div className="space-y-6">
           
-          {/* Main Showcase Image */}
-          <div className="relative w-full h-[26rem] sm:h-[32rem] bg-gradient-to-b from-royalty-nude/40 to-white rounded-3xl p-8 border border-royalty-nude-dark flex items-center justify-center overflow-hidden shadow-inner group">
+          {/* Main Selected Image Showcase */}
+          <div className="bg-white rounded-3xl p-8 sm:p-12 border border-royalty-nude-dark shadow-sm flex items-center justify-center relative overflow-hidden group">
             <img 
               src={currentImage} 
               alt={product.displayName} 
-              className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" 
+              className="max-h-[420px] w-full object-contain transition-transform duration-500 group-hover:scale-105"
             />
             {product.hasDiscount && (
-              <div className="absolute top-4 left-4 bg-royalty-wine text-white px-3.5 py-1 rounded-md text-xs font-extrabold uppercase tracking-widest shadow-sm">
+              <div className="absolute top-6 left-6 bg-royalty-wine text-white px-3.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider shadow-sm">
                 {product.formattedDiscount}
               </div>
             )}
           </div>
 
-          {/* Gallery Thumbnails */}
+          {/* Thumbnail Strip */}
           {product.images && product.images.length > 1 && (
-            <div className="grid grid-cols-4 gap-4">
-              {product.images.slice(0, 4).map((img, idx) => (
+            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+              {product.images.map((img, index) => (
                 <button
-                  key={idx}
+                  type="button"
+                  key={index}
                   onClick={() => setSelectedImage(img)}
-                  className={`relative aspect-square rounded-2xl overflow-hidden bg-royalty-nude/30 border p-2 transition-all cursor-pointer ${
+                  className={`w-20 h-20 rounded-2xl p-2 bg-white border transition-all duration-200 shrink-0 overflow-hidden cursor-pointer ${
                     currentImage === img 
-                      ? 'border-royalty-yellow ring-2 ring-royalty-yellow/50 shadow-sm scale-102' 
-                      : 'border-royalty-nude-dark hover:border-slate-400'
+                      ? 'border-2 border-royalty-yellow shadow-md scale-105' 
+                      : 'border-royalty-nude-dark hover:border-slate-400 opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <img 
-                    src={img} 
-                    alt={`Preview ${idx + 1}`} 
-                    className="w-full h-full object-contain" 
-                  />
+                  <img src={img} alt={`Preview ${index + 1}`} className="w-full h-full object-contain" />
                 </button>
               ))}
             </div>
           )}
 
         </div>
-        
-        {/* Right Column: Details & Purchase Actions */}
+
+        {/* Right: Artifact Details Column */}
         <div className="flex flex-col justify-between">
           <div>
             
@@ -338,6 +339,7 @@ export default function ProductDetail() {
 
             {/* Primary Add to Vault CTA */}
             <button 
+              type="button"
               onClick={handleAddToCart}
               className="flex-1 w-full bg-gradient-to-r from-royalty-wine to-royalty-purple hover:brightness-110 text-white font-extrabold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 uppercase tracking-widest text-xs border border-royalty-yellow/40 flex items-center justify-center gap-2 cursor-pointer"
             >
@@ -349,20 +351,20 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* Product Reviews & Accolades Section */}
+      {/* Feature 4: Verified Patron Reviews & Testimonials */}
       <ProductReviews 
-        productId={product.id}
-        initialReviews={product.reviews || []}
-        initialRating={product.rating || 5}
-        onReviewsUpdated={(data) => {
-          setProduct(prev => ({
-            ...prev,
-            rating: data.updatedRating || prev.rating,
-            reviews: data.reviews || prev.reviews
-          }));
+        productId={product.id} 
+        initialReviews={product.reviews} 
+        initialRating={product.rating}
+        onReviewsUpdated={(result) => {
+          if (result.updatedRating) {
+            setProduct(prev => prev ? ({ ...prev, rating: result.updatedRating }) : null);
+          }
         }}
       />
 
     </div>
   );
-}
+};
+
+export default ProductDetail;

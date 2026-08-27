@@ -1,3 +1,4 @@
+import { FC } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Home, Details, Checkout, Wishlist, Orders, AdminDashboard } from './pages';
 import { CartDrawer, AuthModal } from './components';
@@ -6,7 +7,7 @@ import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 
 // Global Toast Banner
-function GlobalToast() {
+const GlobalToast: FC = () => {
   const { toast } = useCart();
   if (!toast) return null;
 
@@ -18,9 +19,9 @@ function GlobalToast() {
       </span>
     </div>
   );
-}
+};
 
-function AppContent() {
+const AppContent: FC = () => {
   return (
     <BrowserRouter>
       <Routes>
@@ -36,9 +37,9 @@ function AppContent() {
       <GlobalToast />
     </BrowserRouter>
   );
-}
+};
 
-function App() {
+export const App: FC = () => {
   return (
     <AuthProvider>
       <CartProvider>
@@ -48,6 +49,6 @@ function App() {
       </CartProvider>
     </AuthProvider>
   );
-}
+};
 
 export default App;

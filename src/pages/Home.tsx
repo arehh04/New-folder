@@ -1,16 +1,16 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, FC, MouseEvent } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProductList from '../components/ProductList';
 import CreateProductModal from '../components/CreateProductModal';
 import { useAuth } from '../context/AuthContext';
 
-export default function Home() {
+export const Home: FC = () => {
   const { isAuthenticated, currentUser } = useAuth();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 
   // Callback function to handle smooth navigation to curations section
-  const handleExploreCallback = useCallback((e) => {
+  const handleExploreCallback = useCallback((e?: MouseEvent<HTMLButtonElement>): void => {
     if (e) e.preventDefault();
     const section = document.getElementById('collection');
     if (section) {
@@ -58,12 +58,14 @@ export default function Home() {
             {/* Action Buttons using Callback Function */}
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               <button 
+                type="button"
                 onClick={handleExploreCallback}
                 className="bg-gradient-to-r from-royalty-wine to-royalty-wine-hover hover:brightness-110 text-white font-extrabold py-4 px-9 rounded-full shadow-xl hover:shadow-royalty-wine/40 hover:-translate-y-0.5 transition-all duration-300 uppercase tracking-widest text-xs border border-royalty-yellow/30 cursor-pointer"
               >
                 👑 Explore The Vault
               </button>
               <button 
+                type="button"
                 onClick={handleExploreCallback}
                 className="bg-white/10 hover:bg-white/15 text-royalty-yellow border border-royalty-yellow/40 font-bold py-4 px-8 rounded-full backdrop-blur-md transition-all duration-300 uppercase tracking-widest text-xs cursor-pointer"
               >
@@ -117,7 +119,7 @@ export default function Home() {
 
         {/* Product Catalog Section */}
         <div id="collection">
-          <ProductList onOpenCreateModal={() => setIsCreateModalOpen(true)} />
+          <ProductList _onOpenCreateModal={() => setIsCreateModalOpen(true)} />
         </div>
 
       </main>
@@ -125,6 +127,7 @@ export default function Home() {
       {/* Floating Admin Add Artifact Action */}
       <div className="fixed bottom-6 left-6 z-40">
         <button
+          type="button"
           onClick={() => setIsCreateModalOpen(true)}
           className="bg-royalty-purple hover:bg-royalty-purple-dark text-royalty-yellow border-2 border-royalty-yellow/60 font-bold py-3 px-5 rounded-full shadow-2xl hover:scale-105 transition-all text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer"
           title="Publish New Artifact (Admin Portal)"
@@ -146,4 +149,6 @@ export default function Home() {
       <Footer />
     </div>
   );
-}
+};
+
+export default Home;

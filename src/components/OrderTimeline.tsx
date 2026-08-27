@@ -1,4 +1,11 @@
-export default function OrderTimeline({ currentStep = 2, status = '' }) {
+import { FC } from 'react';
+
+export interface OrderTimelineProps {
+  currentStep?: number;
+  status?: string;
+}
+
+export const OrderTimeline: FC<OrderTimelineProps> = ({ currentStep = 2, status = '' }) => {
   const steps = [
     { title: 'Authorized', subtitle: 'Royal Seal Affixed', icon: '👑' },
     { title: 'Vault Sealed', subtitle: 'White-Glove Auth', icon: '⚜️' },
@@ -58,9 +65,11 @@ export default function OrderTimeline({ currentStep = 2, status = '' }) {
       <div className="pt-8 text-center">
         <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-royalty-nude/70 border border-royalty-nude-dark text-[11px] font-bold text-royalty-purple">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-          Current Status: <strong className="text-royalty-wine font-black">{status || 'In Transit via Royal Courier'}</strong>
+          Live Sovereign Status: <span className="text-royalty-wine font-extrabold">{status || 'In Sovereign Transit'}</span>
         </span>
       </div>
     </div>
   );
-}
+};
+
+export default OrderTimeline;

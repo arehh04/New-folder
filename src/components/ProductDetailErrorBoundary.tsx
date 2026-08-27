@@ -1,20 +1,29 @@
-import React from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
-export default class ProductDetailErrorBoundary extends React.Component {
-  constructor(props) {
+export interface ErrorBoundaryProps {
+  children: ReactNode;
+}
+
+export interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+export default class ProductDetailErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error("Caught error in ProductDetailErrorBoundary:", error, errorInfo);
   }
 
-  render() {
+  render(): ReactNode {
     if (this.state.hasError) {
       return (
         <div className="flex justify-center items-center min-h-[50vh] p-8">
@@ -26,6 +35,7 @@ export default class ProductDetailErrorBoundary extends React.Component {
               {this.state.error?.toString()}
             </p>
             <button 
+              type="button"
               className="mt-8 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl transition-colors border-none cursor-pointer" 
               onClick={() => this.setState({ hasError: false, error: null })}
             >

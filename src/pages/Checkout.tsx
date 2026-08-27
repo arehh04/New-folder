@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, FC, FormEvent, MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -6,34 +6,35 @@ import { orderBusiness } from '../business/orderBusiness';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import OrderConfirmationModal from '../components/OrderConfirmationModal';
+import { UIOrderModel } from '../business/orderBusiness';
 
-export default function Checkout() {
+export const Checkout: FC = () => {
   const { cartItems, clearCart } = useCart();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
   // Form State
-  const [fullName, setFullName] = useState(currentUser?.fullName || 'Lady Guinevere');
-  const [email, setEmail] = useState(currentUser?.email || 'patron@royalvault.com');
-  const [street, setStreet] = useState('100 Sovereign Boulevard');
-  const [city, setCity] = useState('London');
-  const [postalCode, setPostalCode] = useState('SW1A 1AA');
-  const [country, setCountry] = useState('United Kingdom');
-  const [deliveryMethod, setDeliveryMethod] = useState('standard'); // 'standard' (0) or 'express' (15)
-  const [cardNumber, setCardNumber] = useState('4532 •••• •••• 8899');
-  const [cardExpiry, setCardExpiry] = useState('12/28');
-  const [cardCvv, setCardCvv] = useState('777');
-  const [promoCodeInput, setPromoCodeInput] = useState('');
-  const [appliedPromo, setAppliedPromo] = useState('');
-  const [promoError, setPromoError] = useState(null);
+  const [fullName, setFullName] = useState<string>(currentUser?.fullName || 'Lady Guinevere');
+  const [email, setEmail] = useState<string>(currentUser?.email || 'patron@royalvault.com');
+  const [street, setStreet] = useState<string>('100 Sovereign Boulevard');
+  const [city, setCity] = useState<string>('London');
+  const [postalCode, setPostalCode] = useState<string>('SW1A 1AA');
+  const [country, setCountry] = useState<string>('United Kingdom');
+  const [deliveryMethod, setDeliveryMethod] = useState<string>('standard'); // 'standard' (0) or 'express' (15)
+  const [cardNumber, setCardNumber] = useState<string>('4532 •••• •••• 8899');
+  const [cardExpiry, setCardExpiry] = useState<string>('12/28');
+  const [cardCvv, setCardCvv] = useState<string>('777');
+  const [promoCodeInput, setPromoCodeInput] = useState<string>('');
+  const [appliedPromo, setAppliedPromo] = useState<string>('');
+  const [promoError, setPromoError] = useState<string | null>(null);
   
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [confirmedOrder, setConfirmedOrder] = useState(null);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [confirmedOrder, setConfirmedOrder] = useState<UIOrderModel | null>(null);
 
   const deliveryFee = deliveryMethod === 'express' ? 15.00 : 0.00;
   const totals = orderBusiness.calculateOrderTotals(cartItems, appliedPromo, deliveryFee);
 
-  const handleApplyPromo = (e) => {
+  const handleApplyPromo = (e: MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
     if (promoCodeInput.trim().toUpperCase() === 'ROYAL10') {
       setAppliedPromo('ROYAL10');
@@ -43,7 +44,7 @@ export default function Checkout() {
     }
   };
 
-  const handleAuthorizeOrder = async (e) => {
+  const handleAuthorizeOrder = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (cartItems.length === 0) {
       alert('Your Royal Vault is empty. Please select artifacts first.');
@@ -67,7 +68,7 @@ export default function Checkout() {
       const result = await orderBusiness.processCheckoutOrder(orderPayload);
       clearCart();
       setConfirmedOrder(result);
-    } catch (err) {
+    } catch (err: any) {
       alert(`⚠️ Order authorization failed: ${err.message}`);
     } finally {
       setIsProcessing(false);
@@ -151,7 +152,7 @@ export default function Checkout() {
 
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                    Street Address / Palace Suite
+                    Estate / Street Address
                   </label>
                   <input 
                     type="text" 
@@ -172,7 +173,7 @@ export default function Checkout() {
                       required
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-royalty-nude/40 border border-royalty-nude-dark rounded-xl text-sm font-semibold text-slate-800 outline-none focus:border-royalty-yellow"
+                      className="w-full px-4 py-2.5 bg-royalty-nude/40 border border-royalty-nude-dark rounded-xl text-sm font-semibold text-slate-800 outline-none focus:border-royalty-yellow"
                     />
                   </div>
                   <div>
@@ -184,28 +185,28 @@ export default function Checkout() {
                       required
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-royalty-nude/40 border border-royalty-nude-dark rounded-xl text-sm font-semibold text-slate-800 outline-none focus:border-royalty-yellow"
+                      className="w-full px-4 py-2.5 bg-royalty-nude/40 border border-royalty-nude-dark rounded-xl text-sm font-semibold text-slate-800 outline-none focus:border-royalty-yellow"
                     />
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                      Country
+                      Realm / Country
                     </label>
                     <input 
                       type="text" 
                       required
                       value={country}
                       onChange={(e) => setCountry(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-royalty-nude/40 border border-royalty-nude-dark rounded-xl text-sm font-semibold text-slate-800 outline-none focus:border-royalty-yellow"
+                      className="w-full px-4 py-2.5 bg-royalty-nude/40 border border-royalty-nude-dark rounded-xl text-sm font-semibold text-slate-800 outline-none focus:border-royalty-yellow"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Section 2: Delivery Method */}
+              {/* Section 2: Royal Delivery Tier */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-royalty-nude-dark shadow-sm space-y-4">
                 <div className="flex items-center gap-2 border-b border-royalty-nude pb-3">
-                  <span className="text-xl">⚜️</span>
+                  <span className="text-xl">🚀</span>
                   <h3 className="text-base font-extrabold uppercase tracking-wider text-royalty-purple">
                     Courier Dispatch Speed
                   </h3>
@@ -213,65 +214,58 @@ export default function Checkout() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <label 
-                    className={`flex items-start gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    onClick={() => setDeliveryMethod('standard')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
                       deliveryMethod === 'standard' 
-                        ? 'border-royalty-wine bg-royalty-nude/40 shadow-xs' 
+                        ? 'border-royalty-wine bg-royalty-wine/5 shadow-xs' 
                         : 'border-royalty-nude-dark hover:border-slate-300'
                     }`}
                   >
-                    <input 
-                      type="radio" 
-                      name="delivery" 
-                      checked={deliveryMethod === 'standard'}
-                      onChange={() => setDeliveryMethod('standard')}
-                      className="mt-1" 
-                    />
                     <div>
-                      <span className="font-extrabold text-sm text-royalty-purple block">
-                        Complimentary Royal Dispatch
-                      </span>
-                      <span className="text-xs text-slate-500 block">2–3 Days • Velvet Wrapped</span>
-                      <span className="text-xs font-bold text-emerald-700 mt-1 block">FREE ($0.00)</span>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-extrabold text-sm text-royalty-purple">Complimentary Dispatch</span>
+                        <span className="text-xs font-black text-emerald-700 uppercase">FREE</span>
+                      </div>
+                      <p className="text-xs text-slate-500">2–3 Business Days with Royal Wax Seal</p>
                     </div>
                   </label>
 
                   <label 
-                    className={`flex items-start gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    onClick={() => setDeliveryMethod('express')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
                       deliveryMethod === 'express' 
-                        ? 'border-royalty-wine bg-royalty-nude/40 shadow-xs' 
+                        ? 'border-royalty-wine bg-royalty-wine/5 shadow-xs' 
                         : 'border-royalty-nude-dark hover:border-slate-300'
                     }`}
                   >
-                    <input 
-                      type="radio" 
-                      name="delivery" 
-                      checked={deliveryMethod === 'express'}
-                      onChange={() => setDeliveryMethod('express')}
-                      className="mt-1" 
-                    />
                     <div>
-                      <span className="font-extrabold text-sm text-royalty-purple block">
-                        Same-Day Sovereign Courier
-                      </span>
-                      <span className="text-xs text-slate-500 block">White-Glove Armed Delivery</span>
-                      <span className="text-xs font-bold text-royalty-wine mt-1 block">+$15.00</span>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-extrabold text-sm text-royalty-purple">Sovereign Courier</span>
+                        <span className="text-xs font-black text-royalty-wine">$15.00</span>
+                      </div>
+                      <p className="text-xs text-slate-500">Same-Day White-Glove Hand Delivery</p>
                     </div>
                   </label>
                 </div>
               </div>
 
-              {/* Section 3: Vault Payment */}
+              {/* Section 3: Vault Payment Credentials */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-royalty-nude-dark shadow-sm space-y-4">
-                <div className="flex items-center gap-2 border-b border-royalty-nude pb-3">
-                  <span className="text-xl">💳</span>
-                  <h3 className="text-base font-extrabold uppercase tracking-wider text-royalty-purple">
-                    Vault-Encrypted Payment
-                  </h3>
+                <div className="flex items-center justify-between border-b border-royalty-nude pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">💳</span>
+                    <h3 className="text-base font-extrabold uppercase tracking-wider text-royalty-purple">
+                      Sovereign Vault Payment
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                    🔒 256-Bit Encrypted
+                  </span>
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                    Card Number (Demo Pre-filled)
+                    Vault Passcard Number
                   </label>
                   <input 
                     type="text" 
@@ -285,7 +279,7 @@ export default function Checkout() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                      Expiration Date
+                      Expiry Date
                     </label>
                     <input 
                       type="text" 
@@ -363,7 +357,7 @@ export default function Checkout() {
                         </div>
                       </div>
                       <span className="font-extrabold text-slate-800">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
                       </span>
                     </div>
                   ))}
@@ -439,4 +433,6 @@ export default function Checkout() {
       <Footer />
     </div>
   );
-}
+};
+
+export default Checkout;

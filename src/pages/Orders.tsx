@@ -1,20 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FC } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import OrderTimeline from '../components/OrderTimeline';
-import { orderBusiness } from '../business/orderBusiness';
+import { orderBusiness, UIOrderModel } from '../business/orderBusiness';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { OrderItemModel } from '../types';
 
-export default function Orders() {
+export const Orders: FC = () => {
   const { isAuthenticated, openLoginModal } = useAuth();
   const { addToCart, showToast } = useCart();
 
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [orders, setOrders] = useState<UIOrderModel[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | number | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -30,7 +31,7 @@ export default function Orders() {
           setExpandedOrderId(data[0].orderId);
         }
       })
-      .catch(err => {
+      .catch((err: any) => {
         setError(err.message);
       })
       .finally(() => {
@@ -38,9 +39,9 @@ export default function Orders() {
       });
   }, [isAuthenticated]);
 
-  const handleReorder = (items) => {
+  const handleReorder = (items: OrderItemModel[]): void => {
     for (const item of items) {
-      addToCart(item, item.quantity || 1);
+      addToCart(item as any, item.quantity || 1);
     }
     showToast(`👑 Transferred ${items.length} items to your Royal Vault`);
   };
@@ -58,59 +59,62 @@ export default function Orders() {
               <span>📜</span> Sovereign Ledger
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-royalty-purple tracking-tight">
-              Patron Order Archives
+              Patron Acquisitions & Records
             </h1>
-            <p className="text-slate-500 text-xs mt-1">
-              Review certified order receipts and track live royal consignments.
+            <p className="text-slate-500 text-xs sm:text-sm mt-1">
+              Complete dispatch archives and white-glove consignment status.
             </p>
           </div>
 
           <Link
             to="/"
-            className="bg-white hover:bg-royalty-nude border border-royalty-nude-dark text-royalty-purple font-bold text-xs uppercase tracking-widest py-3 px-6 rounded-full transition-colors shadow-xs"
+            className="px-4 py-2.5 bg-royalty-nude hover:bg-royalty-nude-dark text-royalty-purple border border-royalty-nude-dark rounded-xl text-xs font-bold uppercase tracking-wider transition-all"
           >
-            ← Return to Curations
+            ← Explore Curations
           </Link>
         </div>
 
-        {/* Unauthenticated State */}
+        {/* State: Not Logged In */}
         {!isAuthenticated ? (
-          <div className="bg-white rounded-3xl p-12 text-center border border-royalty-nude-dark shadow-sm">
-            <span className="text-5xl block mb-4">👑</span>
-            <h3 className="text-2xl font-black text-royalty-purple mb-2">Sovereign Identification Required</h3>
+          <div className="bg-white rounded-3xl p-16 text-center border border-royalty-nude-dark shadow-sm">
+            <span className="text-6xl mb-4 block">👑</span>
+            <h3 className="text-2xl font-bold text-royalty-purple mb-2">Authentication Required</h3>
             <p className="text-slate-500 text-sm max-w-md mx-auto mb-6">
-              Please sign in with your sovereign credentials to inspect your personalized order history and tracking ledgers.
+              Sign in with your sovereign credentials to access your permanent consignment history.
             </p>
             <button
+              type="button"
               onClick={openLoginModal}
-              className="bg-royalty-wine hover:bg-royalty-wine-hover text-white font-extrabold py-3.5 px-8 rounded-full uppercase tracking-widest text-xs shadow-md transition-all cursor-pointer"
+              className="bg-gradient-to-r from-royalty-wine to-royalty-purple text-white font-bold py-3.5 px-8 rounded-full text-xs uppercase tracking-widest transition-all shadow-md cursor-pointer"
             >
-              Sign In to Inspect Ledger
+              Sign In to Sanctuary
             </button>
           </div>
         ) : loading ? (
-          <div className="py-20 flex flex-col items-center justify-center">
-            <div className="w-14 h-14 border-4 border-royalty-nude-dark border-t-royalty-wine rounded-full animate-spin mb-4"></div>
+          <div className="bg-white rounded-3xl p-16 border border-royalty-nude-dark shadow-sm flex flex-col items-center justify-center">
+            <div className="w-12 h-12 border-3 border-royalty-yellow border-t-transparent rounded-full animate-spin mb-4"></div>
             <p className="text-xs font-extrabold uppercase tracking-widest text-royalty-purple">
-              Retrieving Sovereign Ledgers...
+              Retrieving Royal Ledger Archives...
             </p>
           </div>
         ) : error ? (
-          <div className="bg-white rounded-3xl p-8 text-center border border-red-200 shadow-sm text-red-700 text-sm font-semibold">
-            ⚠️ {error}
+          <div className="bg-white rounded-3xl p-12 text-center border border-red-200 shadow-sm">
+            <span className="text-5xl mb-3 block">⚠️</span>
+            <h3 className="text-xl font-bold text-red-600 mb-2">Archive Query Error</h3>
+            <p className="text-slate-600 text-xs mb-4">{error}</p>
           </div>
         ) : orders.length === 0 ? (
           <div className="bg-white rounded-3xl p-16 text-center border border-royalty-nude-dark shadow-sm">
-            <span className="text-6xl block mb-4">📜</span>
-            <h3 className="text-2xl font-black text-royalty-purple mb-2">No Past Orders Found</h3>
-            <p className="text-slate-500 text-sm max-w-md mx-auto mb-8">
-              Your royal acquisition ledger is currently pristine. Explore our vault curations to authorize your inaugural acquisition.
+            <span className="text-6xl mb-4 block">📜</span>
+            <h3 className="text-2xl font-bold text-royalty-purple mb-2">No Past Acquisitions Recorded</h3>
+            <p className="text-slate-500 text-sm max-w-md mx-auto mb-6">
+              Your royal acquisition register is pristine. Begin acquiring handpicked artifacts today.
             </p>
             <Link
               to="/"
-              className="bg-gradient-to-r from-royalty-wine to-royalty-purple hover:brightness-110 text-white font-extrabold py-4 px-8 rounded-full uppercase tracking-widest text-xs shadow-lg transition-all"
+              className="inline-block bg-royalty-wine hover:bg-royalty-wine-hover text-white font-bold py-3.5 px-8 rounded-full text-xs uppercase tracking-widest shadow-md transition-all"
             >
-              👑 Discover Curations
+              Explore Sovereign Collection
             </Link>
           </div>
         ) : (
@@ -121,30 +125,37 @@ export default function Orders() {
               return (
                 <div
                   key={order.orderId}
-                  className="bg-white rounded-3xl border border-royalty-nude-dark shadow-sm overflow-hidden transition-all duration-200"
+                  className="bg-white rounded-3xl border border-royalty-nude-dark overflow-hidden shadow-xs hover:border-royalty-yellow/60 transition-all"
                 >
-                  {/* Order Card Header */}
+                  {/* Order Card Summary Banner */}
                   <div
                     onClick={() => setExpandedOrderId(isExpanded ? null : order.orderId)}
-                    className="p-6 bg-gradient-to-r from-royalty-nude/40 to-white hover:bg-royalty-nude/60 cursor-pointer flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-colors"
+                    className="p-6 sm:p-7 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 cursor-pointer hover:bg-royalty-nude/20 transition-colors"
                   >
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono text-sm font-black text-royalty-purple">
-                          {order.orderId}
-                        </span>
-                        <span className="bg-royalty-wine/10 text-royalty-wine text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                          {order.status}
-                        </span>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-royalty-purple text-royalty-yellow border border-royalty-yellow/40 flex items-center justify-center text-xl shadow-xs">
+                        👑
                       </div>
-                      <p className="text-[11px] text-slate-400 font-medium mt-1">
-                        Authorized on {order.formattedDate}
-                      </p>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-black text-royalty-purple">
+                            #{order.orderId}
+                          </span>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-royalty-nude text-royalty-wine border border-royalty-nude-dark">
+                            {order.status}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400 font-medium mt-0.5">
+                          Consigned on {order.formattedDate} • {order.items?.length || 0} Artifacts
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
-                      <div className="text-right">
-                        <span className="text-xs text-slate-400 block uppercase font-bold">Grand Total</span>
+                    <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-0 border-royalty-nude">
+                      <div className="text-left sm:text-right">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                          Total Valuation
+                        </span>
                         <span className="text-lg font-black text-royalty-wine">
                           {order.formattedTotal}
                         </span>
@@ -239,6 +250,7 @@ export default function Orders() {
                           </div>
 
                           <button
+                            type="button"
                             onClick={() => handleReorder(order.items)}
                             className="w-full bg-royalty-purple hover:bg-royalty-purple-dark text-royalty-yellow font-extrabold py-3 px-4 rounded-xl text-xs uppercase tracking-widest transition-colors cursor-pointer shadow-xs"
                           >
@@ -261,4 +273,6 @@ export default function Orders() {
       <Footer />
     </div>
   );
-}
+};
+
+export default Orders;

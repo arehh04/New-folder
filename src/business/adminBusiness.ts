@@ -19,6 +19,7 @@ export interface UIInventoryAlert {
   stock: number;
   price: number;
   category: string;
+  thumbnail?: string;
   formattedPrice: string;
   isCritical: boolean;
 }
@@ -77,7 +78,7 @@ export const adminBusiness = {
   /**
    * Update order fulfillment stage
    */
-  updateOrderStatus: async (orderId: string, newStatus: string, estimatedDelivery?: string) => {
+  updateOrderStatus: async (orderId: string | number, newStatus: string, estimatedDelivery?: string) => {
     try {
       return await adminService.updateOrderStatus(orderId, {
         status: newStatus,

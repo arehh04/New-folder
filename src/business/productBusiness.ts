@@ -63,6 +63,10 @@ export const productBusiness = {
     }
   },
 
+  addNewProductToVault: async (productData: Partial<ProductDTO>): Promise<UIProduct> => {
+    return await productBusiness.createProduct(productData);
+  },
+
   /**
    * Updates an existing product
    */
@@ -76,6 +80,10 @@ export const productBusiness = {
     }
   },
 
+  updateProductInventory: async (id: string | number, updateData: Partial<ProductDTO>): Promise<UIProduct> => {
+    return await productBusiness.updateProduct(id, updateData);
+  },
+
   /**
    * Deletes a product from the vault
    */
@@ -84,6 +92,22 @@ export const productBusiness = {
       return await productService.deleteProduct(id);
     } catch (error) {
       console.error("Business Layer Error (deleteProduct):", error);
+      throw error;
+    }
+  },
+
+  deleteProductFromVault: async (id: string | number): Promise<{ message: string; id: string | number }> => {
+    return await productBusiness.deleteProduct(id);
+  },
+
+  /**
+   * Submits a new product review
+   */
+  postProductReview: async (id: string | number, reviewData: any): Promise<any> => {
+    try {
+      return await productService.postReview(id, reviewData);
+    } catch (error) {
+      console.error("Business Layer Error (postProductReview):", error);
       throw error;
     }
   }

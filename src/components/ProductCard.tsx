@@ -1,8 +1,14 @@
+import { FC, MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { UIProduct } from '../types';
 
-export default function ProductCard({ product }) {
+export interface ProductCardProps {
+  product: UIProduct;
+}
+
+export const ProductCard: FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
 
@@ -34,7 +40,8 @@ export default function ProductCard({ product }) {
 
         {/* Wishlist Heart Button */}
         <button
-          onClick={(e) => {
+          type="button"
+          onClick={(e: MouseEvent<HTMLButtonElement>) => {
             e.preventDefault();
             toggleWishlist(product);
           }}
@@ -79,6 +86,7 @@ export default function ProductCard({ product }) {
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <button 
+              type="button"
               onClick={() => addToCart(product, 1)}
               className="bg-royalty-wine hover:bg-royalty-wine-hover text-white text-xs font-bold py-2 px-3.5 rounded-full shadow-xs hover:shadow-md transition-all duration-200 uppercase tracking-wider cursor-pointer"
               title="Add to Vault"
@@ -96,4 +104,6 @@ export default function ProductCard({ product }) {
       </div>
     </div>
   );
-}
+};
+
+export default ProductCard;

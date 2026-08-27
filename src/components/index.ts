@@ -14,3 +14,4 @@ export { default as FuzzySearchBar } from './FuzzySearchBar';
 export { default as AdminAnalyticsStudio } from './AdminAnalyticsStudio';
 export { default as Accordion } from './Accordion';
 export { default as QuantitySelector } from './QuantitySelector';
+export { default as ProductDetailErrorBoundary } from './ProductDetailErrorBoundary';

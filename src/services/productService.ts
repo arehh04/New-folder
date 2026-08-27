@@ -76,6 +76,14 @@ export const productService = {
   createProduct: async (productData: Partial<ProductDTO>): Promise<ProductDTO> => {
     const res = await axiosInstance.post<ProductDTO>('/products', productData);
     return res.data;
+  },
+
+  /**
+   * Post a product review
+   */
+  postReview: async (id: string | number, reviewData: any): Promise<any> => {
+    const res = await axiosInstance.post(`/products/${id}/reviews`, reviewData);
+    return res.data;
   }
 };
 

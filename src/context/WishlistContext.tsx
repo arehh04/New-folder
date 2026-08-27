@@ -1,10 +1,19 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode, FC } from 'react';
 import { useCart } from './CartContext';
+import { UIProduct } from '../types';
 
-const WishlistContext = createContext();
+export interface WishlistContextType {
+  wishlistItems: UIProduct[];
+  isInWishlist: (productId: number | string) => boolean;
+  toggleWishlist: (product: UIProduct) => void;
+  removeFromWishlist: (productId: number | string) => void;
+  getWishlistCount: () => number;
+}
 
-export function WishlistProvider({ children }) {
-  const [wishlistItems, setWishlistItems] = useState(() => {
+const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
+
+export const WishlistProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  const [wishlistItems, setWishlistItems] = useState<UIProduct[]>(() => {
     try {
       const saved = localStorage.getItem('id10t_wishlist');
       return saved ? JSON.parse(saved) : [];
@@ -23,11 +32,12 @@ export function WishlistProvider({ children }) {
     }
   }, [wishlistItems]);
 
-  const isInWishlist = useCallback((productId) => {
-    return wishlistItems.some(item => item.id === productId);
+  const isInWishlist = useCallback((productId: number | string): boolean => {
+    const idNum = Number(productId);
+    return wishlistItems.some(item => item.id === idNum);
   }, [wishlistItems]);
 
-  const toggleWishlist = useCallback((product) => {
+  const toggleWishlist = useCallback((product: UIProduct): void => {
     if (!product) return;
 
     setWishlistItems(prev => {
@@ -42,11 +52,12 @@ export function WishlistProvider({ children }) {
     });
   }, [showToast]);
 
-  const removeFromWishlist = useCallback((productId) => {
-    setWishlistItems(prev => prev.filter(item => item.id !== productId));
+  const removeFromWishlist = useCallback((productId: number | string): void => {
+    const idNum = Number(productId);
+    setWishlistItems(prev => prev.filter(item => item.id !== idNum));
   }, []);
 
-  const getWishlistCount = useCallback(() => {
+  const getWishlistCount = useCallback((): number => {
     return wishlistItems.length;
   }, [wishlistItems]);
 
@@ -63,12 +74,14 @@ export function WishlistProvider({ children }) {
       {children}
     </WishlistContext.Provider>
   );
-}
+};
 
-export function useWishlist() {
+export function useWishlist(): WishlistContextType {
   const context = useContext(WishlistContext);
   if (!context) {
     throw new Error('useWishlist must be used within a WishlistProvider');
   }
   return context;
 }
+
+export default WishlistContext;

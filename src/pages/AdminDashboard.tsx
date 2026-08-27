@@ -1,28 +1,27 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, FC } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AdminAnalyticsStudio from '../components/AdminAnalyticsStudio';
-import { adminBusiness } from '../business/adminBusiness';
+import { adminBusiness, UIDashboardData } from '../business/adminBusiness';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
-export default function AdminDashboard() {
+export const AdminDashboard: FC = () => {
   const { currentUser, isAuthenticated, openLoginModal } = useAuth();
   const { showToast } = useCart();
 
-  const [dashboard, setDashboard] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [updatingOrderId, setUpdatingOrderId] = useState(null);
+  const [dashboard, setDashboard] = useState<UIDashboardData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | number | null>(null);
 
-  const fetchAdminData = async () => {
+  const fetchAdminData = async (): Promise<void> => {
     setLoading(true);
     setError(null);
     try {
       const data = await adminBusiness.getDashboardData();
       setDashboard(data);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
@@ -37,13 +36,13 @@ export default function AdminDashboard() {
     }
   }, [isAuthenticated, currentUser]);
 
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusChange = async (orderId: string | number, newStatus: string): Promise<void> => {
     setUpdatingOrderId(orderId);
     try {
       await adminBusiness.updateOrderStatus(orderId, newStatus);
       showToast(`👑 Order #${orderId} updated to "${newStatus}"`);
       await fetchAdminData();
-    } catch (err) {
+    } catch (err: any) {
       alert(`⚠️ Update failed: ${err.message}`);
     } finally {
       setUpdatingOrderId(null);
@@ -62,6 +61,7 @@ export default function AdminDashboard() {
               Access to this sanctuary is restricted exclusively to authenticated store custodians (Admins).
             </p>
             <button
+              type="button"
               onClick={openLoginModal}
               className="bg-royalty-wine hover:bg-royalty-wine-hover text-white text-xs font-bold uppercase tracking-widest py-3 px-8 rounded-full shadow-sm cursor-pointer"
             >
@@ -94,6 +94,7 @@ export default function AdminDashboard() {
           </div>
 
           <button
+            type="button"
             onClick={fetchAdminData}
             className="bg-white hover:bg-royalty-nude border border-royalty-nude-dark text-royalty-purple font-extrabold text-xs uppercase tracking-widest py-3 px-6 rounded-full transition-colors shadow-xs cursor-pointer flex items-center gap-2"
           >
@@ -167,7 +168,7 @@ export default function AdminDashboard() {
                   {dashboard.metrics.lowStockCount} Artifacts
                 </h3>
                 <p className="text-[11px] text-slate-500 mt-2 font-medium">
-                  Units $\le 5$ requiring replenishment
+                  Units ≤ 5 requiring replenishment
                 </p>
               </div>
 
@@ -246,7 +247,7 @@ export default function AdminDashboard() {
                   <tbody className="divide-y divide-royalty-nude">
                     {dashboard.recentOrders.length === 0 ? (
                       <tr>
-                        <td colSpan="5" className="py-8 text-center text-slate-400 font-semibold">
+                        <td colSpan={5} className="py-8 text-center text-slate-400 font-semibold">
                           No orders authorized yet in royal ledger archives.
                         </td>
                       </tr>
@@ -254,7 +255,7 @@ export default function AdminDashboard() {
                       dashboard.recentOrders.map(order => (
                         <tr key={order.orderId} className="hover:bg-royalty-nude/20 transition-colors">
                           <td className="py-4 font-mono font-black text-royalty-purple">
-                            {order.orderId}
+                            #{order.orderId}
                           </td>
                           <td className="py-4 font-bold text-slate-800">
                             {order.customer?.fullName || 'Sovereign Patron'}
@@ -294,4 +295,6 @@ export default function AdminDashboard() {
       <Footer />
     </div>
   );
-}
+};
+
+export default AdminDashboard;

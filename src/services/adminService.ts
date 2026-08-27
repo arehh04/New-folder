@@ -19,6 +19,7 @@ export interface InventoryAlertItem {
   stock: number;
   price: number;
   category: string;
+  thumbnail?: string;
 }
 
 export interface InventoryAlertsResponse {
@@ -95,7 +96,7 @@ export const adminService = {
   /**
    * Update fulfillment status of an order
    */
-  updateOrderStatus: async (orderId: string, payload: UpdateOrderStatusPayload): Promise<OrderDTO> => {
+  updateOrderStatus: async (orderId: string | number, payload: UpdateOrderStatusPayload): Promise<OrderDTO> => {
     const res = await axiosInstance.patch<OrderDTO>(`/admin/orders/${orderId}/status`, payload);
     return res.data;
   }

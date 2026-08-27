@@ -1,9 +1,10 @@
+import { FC } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProductDetail from '../components/ProductDetail';
 import ProductDetailErrorBoundary from '../components/ProductDetailErrorBoundary';
 
-export default function Details() {
+export const Details: FC = () => {
   return (
     <div className="productdetail-page min-h-screen bg-royalty-nude flex flex-col font-sans selection:bg-royalty-yellow/30 selection:text-royalty-purple">
       <Header />
@@ -15,4 +16,6 @@ export default function Details() {
       <Footer />
     </div>
   );
-}
+};
+
+export default Details;

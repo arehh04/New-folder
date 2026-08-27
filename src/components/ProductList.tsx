@@ -1,10 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, FC } from 'react';
 import { useProducts, useDebounce } from '../hooks';
 import ProductCard from './ProductCard';
 import CardSkeleton from './CardSkeleton';
 import FuzzySearchBar from './FuzzySearchBar';
 
-export default function ProductList({ _onOpenCreateModal }) {
+export interface ProductListProps {
+  _onOpenCreateModal?: () => void;
+}
+
+export const ProductList: FC<ProductListProps> = ({ _onOpenCreateModal }) => {
   const { 
     products, 
     loading, 
@@ -16,18 +20,18 @@ export default function ProductList({ _onOpenCreateModal }) {
     refreshProducts 
   } = useProducts(12);
 
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('featured');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sortBy, setSortBy] = useState<string>('featured');
   
-  // Debounce search query by 300ms to eliminate continuous re-renders and re-filtering during typing
+  // Debounce search query by 300ms
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   
-  // Feature 5: Multi-Facet Filters
-  const [maxPrice, setMaxPrice] = useState(500);
-  const [minRating, setMinRating] = useState(0);
-  const [inStockOnly, setInStockOnly] = useState(false);
-  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  // Multi-Facet Filters
+  const [maxPrice, setMaxPrice] = useState<number>(500);
+  const [minRating, setMinRating] = useState<number>(0);
+  const [inStockOnly, setInStockOnly] = useState<boolean>(false);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false);
 
   // Extract unique categories dynamically from products
   const categories = useMemo(() => {
@@ -66,7 +70,7 @@ export default function ProductList({ _onOpenCreateModal }) {
 
   const hasActiveFacets = selectedCategory !== 'All' || searchQuery !== '' || sortBy !== 'featured' || maxPrice < 500 || minRating > 0 || inStockOnly;
 
-  const resetAllFilters = () => {
+  const resetAllFilters = (): void => {
     setSelectedCategory('All');
     setSearchQuery('');
     setSortBy('featured');
@@ -102,6 +106,7 @@ export default function ProductList({ _onOpenCreateModal }) {
           <h2 className="text-xl font-bold text-royalty-wine mb-2">Vault Connection Disrupted</h2>
           <p className="text-slate-600 text-sm mb-6">{error}</p>
           <button 
+            type="button"
             onClick={refreshProducts}
             className="bg-royalty-wine hover:bg-royalty-wine-hover text-white text-xs font-bold uppercase tracking-widest py-3 px-6 rounded-full transition-all shadow-sm cursor-pointer"
           >
@@ -148,6 +153,7 @@ export default function ProductList({ _onOpenCreateModal }) {
             
             {/* Multi-Facet Filter Toggle Button */}
             <button
+              type="button"
               onClick={() => setIsFilterDrawerOpen(!isFilterDrawerOpen)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-extrabold uppercase tracking-wider transition-all cursor-pointer ${
                 isFilterDrawerOpen || maxPrice < 500 || minRating > 0 || inStockOnly
@@ -217,6 +223,7 @@ export default function ProductList({ _onOpenCreateModal }) {
                     { label: '★ 4.5+', val: 4.5 }
                   ].map(r => (
                     <button
+                      type="button"
                       key={r.val}
                       onClick={() => setMinRating(r.val)}
                       className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
@@ -258,6 +265,7 @@ export default function ProductList({ _onOpenCreateModal }) {
           </span>
           {categories.map((cat) => (
             <button
+              type="button"
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-200 cursor-pointer ${
@@ -298,6 +306,7 @@ export default function ProductList({ _onOpenCreateModal }) {
 
           {hasActiveFacets && (
             <button
+              type="button"
               onClick={resetAllFilters}
               className="text-royalty-wine hover:underline font-bold transition-colors cursor-pointer"
             >
@@ -317,6 +326,7 @@ export default function ProductList({ _onOpenCreateModal }) {
             We couldn't find any curations matching your search criteria. Try adjusting your price range or clearing active filters.
           </p>
           <button
+            type="button"
             onClick={resetAllFilters}
             className="bg-royalty-wine hover:bg-royalty-wine-hover text-white font-bold py-3 px-8 rounded-full text-xs uppercase tracking-widest shadow-sm transition-all cursor-pointer"
           >
@@ -335,6 +345,7 @@ export default function ProductList({ _onOpenCreateModal }) {
           {hasMore && selectedCategory === 'All' && !searchQuery && maxPrice === 500 && minRating === 0 && (
             <div className="text-center pt-8">
               <button
+                type="button"
                 onClick={loadMoreProducts}
                 disabled={loadingMore}
                 className="bg-white hover:bg-royalty-nude border-2 border-royalty-yellow/70 text-royalty-purple hover:text-royalty-wine font-extrabold py-4 px-10 rounded-full shadow-md hover:shadow-xl uppercase tracking-widest text-xs transition-all cursor-pointer disabled:opacity-50 inline-flex items-center gap-3"
@@ -358,4 +369,6 @@ export default function ProductList({ _onOpenCreateModal }) {
 
     </section>
   );
-}
+};
+
+export default ProductList;
