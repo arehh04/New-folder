@@ -1,21 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FC } from 'react';
+
+export interface QuantitySelectorProps {
+  initialValue?: number;
+  min?: number;
+  max?: number;
+  onChange?: (quantity: number) => void;
+}
 
 /**
  * Royal Quantity Selector / Step Controller
- * @param {Object} props
- * @param {number} [props.initialValue=1]
- * @param {number} [props.min=1]
- * @param {number} [props.max=99]
- * @param {Function} props.onChange
  */
-export default function QuantitySelector({ initialValue = 1, min = 1, max = 99, onChange }) {
-  const [count, setCount] = useState(initialValue);
+export const QuantitySelector: FC<QuantitySelectorProps> = ({ 
+  initialValue = 1, 
+  min = 1, 
+  max = 99, 
+  onChange 
+}) => {
+  const [count, setCount] = useState<number>(initialValue);
 
   useEffect(() => {
     setCount(initialValue);
   }, [initialValue]);
 
-  const handleDecrement = () => {
+  const handleDecrement = (): void => {
     if (count > min) {
       const newCount = count - 1;
       setCount(newCount);
@@ -23,7 +30,7 @@ export default function QuantitySelector({ initialValue = 1, min = 1, max = 99, 
     }
   };
 
-  const handleIncrement = () => {
+  const handleIncrement = (): void => {
     if (count < max) {
       const newCount = count + 1;
       setCount(newCount);
@@ -56,4 +63,6 @@ export default function QuantitySelector({ initialValue = 1, min = 1, max = 99, 
       </button>
     </div>
   );
-}
+};
+
+export default QuantitySelector;
