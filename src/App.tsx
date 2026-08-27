@@ -1,12 +1,39 @@
-import { FC } from 'react';
+import { FC, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Home, Details, Checkout, Wishlist, Orders, AdminDashboard } from './pages';
 import { CartDrawer, AuthModal } from './components';
 import { CartProvider, useCart } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 
-// Global Toast Banner
+// Route-Level Code Splitting: Lazy loaded route chunks for sub-second initial load times
+const Home = lazy(() => import('./pages/Home'));
+const Details = lazy(() => import('./pages/Details'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
+const Orders = lazy(() => import('./pages/Orders'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+
+// Royal Page Loading Fallback Component
+const PageLoadingFallback: FC = () => {
+  return (
+    <div className="min-h-screen bg-royalty-nude flex flex-col items-center justify-center p-6 text-center animate-pulse">
+      <div className="w-16 h-16 rounded-2xl bg-royalty-purple text-royalty-yellow border-2 border-royalty-yellow/50 flex items-center justify-center text-3xl shadow-xl mb-4 animate-bounce">
+        ⚜️
+      </div>
+      <h3 className="text-base font-extrabold uppercase tracking-widest text-royalty-purple mb-1">
+        Unlocking Sovereign Sanctuary...
+      </h3>
+      <p className="text-xs text-slate-400 font-semibold">
+        Fetching cryptographic vault archives and haute assets.
+      </p>
+      <div className="w-40 h-1 bg-royalty-nude-dark rounded-full overflow-hidden mt-4">
+        <div className="h-full gold-shimmer rounded-full w-full"></div>
+      </div>
+    </div>
+  );
+};
+
+// Global Toast Notification Banner
 const GlobalToast: FC = () => {
   const { toast } = useCart();
   if (!toast) return null;
@@ -24,14 +51,16 @@ const GlobalToast: FC = () => {
 const AppContent: FC = () => {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/product/:id" element={<Details />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-      </Routes>
+      <Suspense fallback={<PageLoadingFallback />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/product/:id" element={<Details />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Routes>
+      </Suspense>
       <CartDrawer />
       <AuthModal />
       <GlobalToast />

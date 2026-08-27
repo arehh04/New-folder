@@ -16,7 +16,9 @@
     "test:blueteam": "node scripts/blueteam-verify.mjs",
     "test:analytics": "node scripts/analytics-fuzzy-test.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "oxlint"
+    "lint": "oxlint",
+    "pre-commit": "node scripts/pre-commit-verify.mjs",
+    "verify:all": "node scripts/pre-commit-verify.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

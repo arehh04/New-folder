@@ -1,0 +1,426 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Id10T Maison de Luxe — Sovereign Enterprise REST API",
+    "description": "Enterprise OpenAPI 3.0 documentation for Id10T Maison de Luxe e-commerce platform. Features multi-tier authentication, Redis caching with probabilistic Bloom filtering, Blue Team SOC threat mitigation, and real-time inventory ledger operations.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Id10T Royal Architecture Council",
+      "email": "custodian@royalvault.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local Sovereign Development Gateway"
+    }
+  ],
+  "tags": [
+    { "name": "Health & Diagnostics", "description": "System status, Redis connectivity, and defensive telemetry" },
+    { "name": "Catalog & Artifacts", "description": "High-performance catalog queries with Redis cache" },
+    { "name": "Search & Autocomplete", "description": "Typo-tolerant fuzzy matching, Levenshtein distance & prefix suggestions" },
+    { "name": "Authentication & RBAC", "description": "HTTP-Only session management, patron enrollment, and token verification" },
+    { "name": "Royal Orders Ledger", "description": "Consignment processing, multi-tenant isolation, and timeline tracking" },
+    { "name": "Executive Admin Sanctuary", "description": "Sales velocity metrics, low-stock warnings, and RFC-4180 CSV exports" }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": ["Health & Diagnostics"],
+        "summary": "Retrieve System & Defense Posture Telemetry",
+        "responses": {
+          "200": {
+            "description": "Server online with active Blue Team safeguards",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "tags": ["Catalog & Artifacts"],
+        "summary": "Query Sovereign Artifacts Catalog",
+        "parameters": [
+          { "name": "category", "in": "query", "schema": { "type": "string" }, "description": "Filter by royal category" },
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Keyword search across titles and descriptions" },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 12 }, "description": "Pagination limit" },
+          { "name": "skip", "in": "query", "schema": { "type": "integer", "default": 0 }, "description": "Pagination offset" }
+        ],
+        "responses": {
+          "200": { "description": "List of artifacts with pagination envelope" }
+        }
+      },
+      "post": {
+        "tags": ["Catalog & Artifacts"],
+        "summary": "Enshrine a New Artifact (Admin Only)",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateProductInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Artifact successfully enshrined" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Forbidden: Requires Admin role" }
+        }
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "tags": ["Catalog & Artifacts"],
+        "summary": "Fetch Single Artifact by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Artifact details retrieved" },
+          "404": { "description": "Artifact not found in vault archives" }
+        }
+      },
+      "put": {
+        "tags": ["Catalog & Artifacts"],
+        "summary": "Update Artifact Inventory & Valuation",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateProductInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Inventory records updated" }
+        }
+      },
+      "delete": {
+        "tags": ["Catalog & Artifacts"],
+        "summary": "Retire Artifact from Vault",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Artifact retired from catalog" }
+        }
+      }
+    },
+    "/api/products/{id}/reviews": {
+      "post": {
+        "tags": ["Catalog & Artifacts"],
+        "summary": "Inscribe a Verified Patron Testimonial",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReviewInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Testimonial successfully recorded" }
+        }
+      }
+    },
+    "/api/products/search/fuzzy": {
+      "get": {
+        "tags": ["Search & Autocomplete"],
+        "summary": "Typo-Tolerant Fuzzy Search (Levenshtein Distance)",
+        "parameters": [
+          { "name": "q", "in": "query", "required": true, "schema": { "type": "string" }, "description": "Query term" }
+        ],
+        "responses": {
+          "200": { "description": "Matched products and correction suggestions" }
+        }
+      }
+    },
+    "/api/products/search/suggestions": {
+      "get": {
+        "tags": ["Search & Autocomplete"],
+        "summary": "Live Autocomplete & Prefix Matcher",
+        "parameters": [
+          { "name": "q", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Matching products and brand chips" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Authentication & RBAC"],
+        "summary": "Authenticate Sovereign Credentials",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Authenticated. Issues HTTP-Only royal_session cookie" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Authentication & RBAC"],
+        "summary": "Enroll New Patron House",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Patron profile enrolled" }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["Authentication & RBAC"],
+        "summary": "Terminate Sovereign Session",
+        "responses": {
+          "200": { "description": "Session cookie cleared" }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": ["Authentication & RBAC"],
+        "summary": "Inspect Current Authenticated Patron Profile",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Profile details retrieved" }
+        }
+      }
+    },
+    "/api/orders": {
+      "get": {
+        "tags": ["Royal Orders Ledger"],
+        "summary": "Retrieve Authenticated Patron Consignments",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "User orders retrieved" }
+        }
+      },
+      "post": {
+        "tags": ["Royal Orders Ledger"],
+        "summary": "Authorize and Enshrine a New Order",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateOrderInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Order authorized and sealed in ledger" }
+        }
+      }
+    },
+    "/api/admin/metrics": {
+      "get": {
+        "tags": ["Executive Admin Sanctuary"],
+        "summary": "Retrieve Executive KPI Metrics & Recent Consignments",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Gross revenues, total items sold, order history" }
+        }
+      }
+    },
+    "/api/admin/analytics/sales-velocity": {
+      "get": {
+        "tags": ["Executive Admin Sanctuary"],
+        "summary": "Compute Total Vault Capitalization & Category Velocity",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Sales velocity metrics with valuation breakdown" }
+        }
+      }
+    },
+    "/api/admin/export/orders-csv": {
+      "get": {
+        "tags": ["Executive Admin Sanctuary"],
+        "summary": "Download RFC-4180 Compliant Orders Ledger CSV",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Streamed CSV spreadsheet",
+            "content": { "text/csv": { "schema": { "type": "string" } } }
+          }
+        }
+      }
+    },
+    "/api/admin/export/inventory-csv": {
+      "get": {
+        "tags": ["Executive Admin Sanctuary"],
+        "summary": "Download Real-Time Inventory Valuation CSV",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Streamed CSV spreadsheet",
+            "content": { "text/csv": { "schema": { "type": "string" } } }
+          }
+        }
+      }
+    },
+    "/api/admin/orders/{id}/status": {
+      "patch": {
+        "tags": ["Executive Admin Sanctuary"],
+        "summary": "Update Package Dispatch Milestone",
+        "security": [{ "cookieAuth": [] }, { "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": { "type": "string", "example": "Delivered to Estate" },
+                  "estimatedDelivery": { "type": "string", "example": "Completed" }
+                },
+                "required": ["status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Consignment milestone updated" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "royal_session",
+        "description": "HTTP-Only Secure Cookie Session Token"
+      },
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Fallback Authorization Header Token"
+      }
+    },
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": { "type": "object" },
+          "message": { "type": "string", "example": "Sovereign operation executed successfully" },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "timestamp": { "type": "string" },
+              "requestId": { "type": "string" }
+            }
+          }
+        }
+      },
+      "LoginInput": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": { "type": "string", "example": "emilys" },
+          "password": { "type": "string", "example": "emilyspass" }
+        }
+      },
+      "RegisterInput": {
+        "type": "object",
+        "required": ["firstName", "lastName", "username", "email", "password"],
+        "properties": {
+          "firstName": { "type": "string", "example": "Lady" },
+          "lastName": { "type": "string", "example": "Guinevere" },
+          "username": { "type": "string", "example": "guinevere" },
+          "email": { "type": "string", "example": "guinevere@royalvault.com" },
+          "password": { "type": "string", "example": "royalpass123" }
+        }
+      },
+      "CreateProductInput": {
+        "type": "object",
+        "required": ["title", "price", "category"],
+        "properties": {
+          "title": { "type": "string", "example": "Royal Diamond Velvet Extrait" },
+          "brand": { "type": "string", "example": "Id10T Maison" },
+          "price": { "type": "number", "example": 249.99 },
+          "stock": { "type": "integer", "example": 15 },
+          "category": { "type": "string", "example": "fragrances" },
+          "thumbnail": { "type": "string", "example": "https://cdn.dummyjson.com/products/images/fragrances/Chanel%20Coco%20Noir%20Eau%20De/thumbnail.png" },
+          "description": { "type": "string", "example": "An opulent extrait de parfum formulated with royal damask roses." }
+        }
+      },
+      "UpdateProductInput": {
+        "type": "object",
+        "properties": {
+          "price": { "type": "number", "example": 229.99 },
+          "stock": { "type": "integer", "example": 20 }
+        }
+      },
+      "ReviewInput": {
+        "type": "object",
+        "required": ["rating", "comment"],
+        "properties": {
+          "rating": { "type": "integer", "minimum": 1, "maximum": 5, "example": 5 },
+          "comment": { "type": "string", "example": "A stunning masterpiece with incredible sillage." },
+          "reviewerName": { "type": "string", "example": "Lady Genevieve" },
+          "reviewerEmail": { "type": "string", "example": "genevieve@royalvault.com" }
+        }
+      },
+      "CreateOrderInput": {
+        "type": "object",
+        "required": ["items", "customer", "shippingAddress", "total"],
+        "properties": {
+          "items": { "type": "array", "items": { "type": "object" } },
+          "customer": {
+            "type": "object",
+            "properties": {
+              "fullName": { "type": "string" },
+              "email": { "type": "string" }
+            }
+          },
+          "shippingAddress": {
+            "type": "object",
+            "properties": {
+              "street": { "type": "string" },
+              "city": { "type": "string" },
+              "postalCode": { "type": "string" },
+              "country": { "type": "string" }
+            }
+          },
+          "deliveryMethod": { "type": "string", "example": "Complimentary Royal Dispatch" },
+          "subtotal": { "type": "number", "example": 199.99 },
+          "discount": { "type": "number", "example": 20.00 },
+          "total": { "type": "number", "example": 179.99 }
+        }
+      }
+    }
+  }
+}
